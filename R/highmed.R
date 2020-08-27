@@ -1,6 +1,31 @@
 
 
-
+##' multivariate_EWAS
+##'
+##' This function computes regularized least squares estimates
+##' for latent factor mixed models using a ridge penalty.
+##'
+##'
+##' @param M a response variable matrix with n rows and p columns.
+##' Each column corresponds to a distinct response variable (beta-normalized methylation profile).
+##' Response variables must be encoded as numeric.
+##' @param X an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Exposure).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param Y an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Outcome).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param K an integer for the number of latent factors in the regression model.
+##' @return an object of class \code{lfmm} with the following attributes:
+##'  - U the latent variable score matrix with dimensions n x K,
+##'  - V the latent variable axis matrix with dimensions p x K,
+##'  - B the effect size matrix with dimensions p x d.
+##' @details The response variable matrix Y and the explanatory variable are centered.
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
 multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
   dat <- lfmm::lfmm_ridge(Y = M, X = cbind(X, Y, covar), K = k)

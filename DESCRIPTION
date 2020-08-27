@@ -1,11 +1,13 @@
 Package: highmed
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Title: High Dimensionnal Mediation Analysis
+Version: 1.0
+Date: 2020-08-27
+Author: Basile Jumentier <basile.jumentier@gmail.com>
+Maintainer: Basile Jumentier <basile.jumentier@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.0.0
