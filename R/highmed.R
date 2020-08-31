@@ -1,14 +1,12 @@
-
-
-##' multivariate_EWAS
+##' multivariate_EWAS Epigenome Wide Association Study with both exposure and outcome
 ##'
-##' This function computes regularized least squares estimates
-##' for latent factor mixed models using a ridge penalty.
+##' This function uses lfmm (latent factor mixed models) to estimate
+##' the effects of exposures and outcomes on a response matrix.
 ##'
 ##'
 ##' @param M a response variable matrix with n rows and p columns.
-##' Each column corresponds to a distinct response variable (beta-normalized methylation profile).
-##' Response variables must be encoded as numeric.
+##' Each column corresponds to a beta-normalized methylation profile.
+##' Response variables must be encoded as numeric. No NAs allowed.
 ##' @param X an explanatory variable matrix with n rows and d columns.
 ##' Each column corresponds to a distinct explanatory variable (Exposure).
 ##' Explanatory variables must be encoded as numeric variables.
@@ -16,11 +14,29 @@
 ##' Each column corresponds to a distinct explanatory variable (Outcome).
 ##' Explanatory variables must be encoded as numeric variables.
 ##' @param K an integer for the number of latent factors in the regression model.
-##' @return an object of class \code{lfmm} with the following attributes:
-##'  - U the latent variable score matrix with dimensions n x K,
-##'  - V the latent variable axis matrix with dimensions p x K,
-##'  - B the effect size matrix with dimensions p x d.
-##' @details The response variable matrix Y and the explanatory variable are centered.
+##' @param covar set of covariable, must be numeric.
+##' @return an object with the following attributes:
+##'
+##'  - U the latent variable score matrix with dimensions n x K.
+##'
+##'  - B the effect size matrix for the exposure X and the outcome Y.
+##'
+##'  - score matrix for the exposure X and the outcome Y.
+##'
+##'  - pValue matrix for the exposure X and the outcome Y.
+##'
+##'  - calibrated.score2, the calibrated score matrix for the exposure X and the outcome Y.
+##'
+##'  - calibrated.pvalue, the calibrated pValue matrix for the exposure X and the outcome Y.
+##'
+##'  - GIF : Genomic Inflation Factor for exposure and outcome
+##'
+##' @details
+##' The response variable matrix Y and the explanatory variable are centered.
+##' Missing values must be imputed. The number of latent factors can be estimated
+##' by looking at the screeplot of eigenvalues of a PCA.
+##' Possibility of calibrating the scores and pValues by the GIF (Genomic Inflation Factor).
+##' See lfmm package for more information.
 ##' @export
 ##' @author Basile Jumentier
 ##' @references
@@ -42,20 +58,96 @@ multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
 
 
-
-max2 <- function(pval1, pval2, diagnostic.plot = F) {
+##' max2 Compute the squared maximum of two series of pValues
+##'
+##' This function compute the squared maximum of two series of pValues from the multivariate_EWAS() function.
+##' The objective of this function is to test all the markers and to determine which could be
+##' potential mediators in the exposure-outcome association.
+##'
+##' @param pval1 vector of pValues (p*1) of exposure.
+##' @param pval2 vector of pValues (p*1) of ouctome.
+##' @param diagnostic.plot if TRUE the histogram of the p-values together
+##' with the estimate of eta0 null line is plotted.
+##' This is useful to visually check the fit of the estimated proportion of null p-values.
+##' @param ... argument of the fdrtool function from the fdrtool package
+##'
+##' @return an object with the following attributes:
+##'
+##'  - a pValue for each markers
+##'
+##'  - a qValue for each markers
+##'
+##'  - the eta0 of the set of pValues
+##'
+##' @details
+##' The pValue is computed for each markers following this formula
+##'
+##' \deqn{pV = max(pVal1, pVal2)^2}
+##'
+##' This quantity eta0, i.e. the proportion eta0 of null p-values in a given vector of p-values,
+##' is an important parameter when controlling the false discovery rate (FDR).
+##' A conservative choice is eta0 = 1 but a choice closer to the true value will
+##' increase efficiency and power - see Benjamini and Hochberg (1995, 2000) and Storey (2002) for details.
+##' We use the fdrtool package to transform pValues into qValues,
+##' which allows us to control the FDR.
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
+max2 <- function(pval1, pval2, diagnostic.plot = F, ...) {
 
   pval <- apply(cbind(pval1, pval2), 1, max)^2
   eta0 <- fdrtool::pval.estimate.eta0(pval, diagnostic.plot = diagnostic.plot)
-  qval <- fdrtool::fdrtool(pval,statistic = "pvalue", plot = F, verbose = F)$qval
+  qval <- fdrtool::fdrtool(pval,statistic = "pvalue", plot = F, verbose = F, ...)$qval
 
   return(list(pval = pval,
               eta0 = eta0,
               qval = qval))
 }
 
-
-univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.1, sims = 3) {
+##' univariate_mediation Run mediation analysis for a set of markers
+##'
+##' Estimate various quantities for causal mediation analysis for each
+##' significant markers, including average causal mediation effects
+##' (indirect effect), average direct effects, proportions mediated,
+##' and total effect.
+##'
+##' @param qval set of qValues from max2() function
+##' @param M a response variable matrix with n rows and p columns.
+##' Each column corresponds to a beta-normalized methylation profile.
+##' Response variables must be encoded as numeric. No NAs allowed.
+##' @param X an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Exposure).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param Y an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Outcome).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param covar set of covariable, must be numeric.
+##' @param U set of latent factors from multivariate_EWAS() function
+##' @param FDR FDR threshold to pass markers in mediation analysis
+##' @param sims number of Monte Carlo draws for nonparametric bootstrap or quasi-Bayesian approximation.
+##' 10000 is recommended.
+##' @param ... argument of the mediate function from the mediation package
+##'
+##' @return
+##' Tables of results of mediation analyzes for markers with a qValue below the FDR threshold.
+##' Indirect effect (ACME - average causal mediation effect), ADE (average direct effect),
+##' PM (proportion mediated) and TE (total effect). Composition of tables: estimated effect,
+##' confidence interval and mediation pValue.
+##'
+##' @details
+##'
+##' We use the mediate() function of the mediation package on the set of markers having a qValue lower
+##' than the FDR threshold. This function makes it possible to estimate their indirect effects and to
+##' test their significance.
+##'
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
+univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.1, sims = 3, ...) {
 
   if (is.null(colnames(M))) {
     colnames(M) <- 1:ncol(M)
@@ -77,7 +169,7 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
     mod1 <- lm(Mi ~ X + ., data = dat.x)
     mod2 <- lm(Y ~ X + Mi + ., data = dat.y)
 
-    med <- mediation::mediate(mod1, mod2, sims = sims, treat = "X", mediator = "Mi")
+    med <- mediation::mediate(mod1, mod2, sims = sims, treat = "X", mediator = "Mi", ...)
 
     ACME[i, ] <- c(med$d0, med$d0.ci[1], med$d0.ci[2], med$d0.p)
     ADE[i, ] <- c(med$z0, med$z0.ci[1], med$z0.ci[2], med$z0.p)
@@ -107,7 +199,19 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
 
 }
 
-
+##' plot_summary_ACME Summary plot for ACME
+##'
+##' This function draw a summary plot of ACME (average causal mediation effect)
+##'
+##' @param ACME the table of ACME from the univariate_mediation() function
+##' @return
+##' Summary plot for ACME
+##'
+##'
+##' @export
+##' @author Basile Jumentier
+##' @examples
+##'
 plot_summary_ACME <- function(ACME) {
 
   p <- ggplot(ACME, aes(est, reorder(CpG, est), color = pval <= 0.05, shape = pval <= 0.05)) +
@@ -127,7 +231,19 @@ plot_summary_ACME <- function(ACME) {
 
 
 
-
+##' plot_summary_med Summary plot for univariate_mediation function
+##'
+##' This function draw a summary plot of the mediation analysis
+##'
+##' @param res_univariate_mediation result object from univariate_mediation() function
+##' @return
+##' Summary plot
+##'
+##'
+##' @export
+##' @author Basile Jumentier
+##' @examples
+##'
 plot_summary_med <- function(res_univariate_mediation) {
 
   tmp <- rbind(cbind(res$ACME, stat = "ACME"),
@@ -158,7 +274,31 @@ plot_summary_med <- function(res_univariate_mediation) {
   print(p)
 }
 
-
+##' combp2 Run mediation analysis for a set of markers
+##'
+##' Function adapt from the combp function() of the ENmix package
+##'
+##' @param data A data frame from bed format file with colname name
+##' "V1","V2", "V3","V4","V5",V1 indicate chromosome (1,2,3,...,X,Y),
+##' V2 is chromosome position, V4 is for P value and V5 for name of CpGs.
+##' @param dist.cutoff Maximum distance in base pair to combine adjacent DMRs.
+##' @param bin.size bin size for autocorrelation calculation.
+##' @param seed FDR significance threshold for initial selection of DMR region.
+##' @param nCores Number of computer cores used in calculation
+##'
+##' @return
+##' Results of the DMRs analysis.
+##'
+##' @details
+##'
+##' The input should be a data frame with column name V1-V5, indicating chromosome, start position,end position,
+##' pValues and probe names. The function will use a modified comb-p method to identify
+##' differentially methylated regions.
+##'
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
 combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCores = 10) {
 
   ##### a function to get a table of p-values for estimating acf
@@ -263,6 +403,30 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
 }
 
 
+##' DMR_search Find DMR
+##'
+##' To identify differentially methylated regions using a modified comb-p method.
+##'
+##' @param chr chromosomes
+##' @param start chromosomal position of markers (start)
+##' @param end chromosomal position of markers (end)
+##' @param pval pValues for each markers, from the max2 function
+##' @param cpg name of each markers
+##' @param ... argument of the combp function from the ENmix package
+##'
+##' @return
+##' A set of selected DMRs.
+##'
+##' @details
+##'
+##' The function will use a modified comb-p method to identify
+##' differentially methylated regions (DMRs).
+##'
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
 DMR_search <- function(chr, start, end, pval, cpg, ...) {
 
   tmp <- data.frame(chr, start, end, pval, cpg)
@@ -275,7 +439,37 @@ DMR_search <- function(chr, start, end, pval, cpg, ...) {
 }
 
 
-
+##' DMR_built Build DMR vector
+##'
+##' To build a vector for each DMR find with DMR_search
+##'
+##' @param res result object of DMR_search function
+##' @param methylation chromosomal position of markers (start)
+##' @param nb_cpg chromosomal position of markers (end)
+##'
+##' @return
+##' A set of build DMRs.
+##'
+##' DMR_acp contains the first components of each PCA for each DMR.
+##' CpG_for_each_DMR contains the list of markers (CpGs) present on each DMR.
+##'
+##'
+##' @details
+##'
+##' We use the series of pValues (one pValue per CpGs) obtained with the EWASmultivariate
+##' regression method and the combination of pValue max2.
+##' To determine the potential DMRs used the combp method present in the ENmix package (Xu et al. 2016).
+##' This method uses the Fisher method to combine the pValues and also the base pair distance (bP)
+##' between CpGs (1000 bP maximum between nb_cpg CpGs on the same DMR).
+##' The information for each DMR is summarized by running a PCA by DMR on all of the CpGs present on each DMR.
+##' Recovering the first principal component of each PCA,
+##' we therefore have a vector corresponding to the first principal component of a PCA for each DMR.
+##'
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
 DMR_built <- function(res, methylation, nb_cpg = 2) {
 
   data <- res$data
@@ -333,12 +527,48 @@ DMR_built <- function(res, methylation, nb_cpg = 2) {
   res <- cbind(DMR = colnames(DMR.acp), res)
   names(DMR.select) <- colnames(DMR.acp)
 
-  return(list(DMR.acp = DMR.acp,
+  return(list(DMR_acp = DMR.acp,
               res = res,
               CpG_for_each_DMR = DMR.select))
 }
 
-
+##' univariate_mediation_DMR Run mediation analysis on DMR
+##'
+##' Estimate various quantities for causal mediation analysis for each
+##' DMRs, including average causal mediation effects
+##' (indirect effect), average direct effects, proportions mediated,
+##' and total effect.
+##'
+##' @param DMR a matrix of DMRs from the DMR_built() function (DMR_acp).
+##' @param X an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Exposure).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param Y an explanatory variable matrix with n rows and d columns.
+##' Each column corresponds to a distinct explanatory variable (Outcome).
+##' Explanatory variables must be encoded as numeric variables.
+##' @param covar set of covariable, must be numeric.
+##' @param U set of latent factors from multivariate_EWAS() function
+##' @param sims number of Monte Carlo draws for nonparametric bootstrap or quasi-Bayesian approximation.
+##' 10000 is recommended.
+##' @param ... argument of the mediate function from the mediation package
+##'
+##' @return
+##' Tables of results of mediation analyzes for markers with a qValue below the FDR threshold.
+##' Indirect effect (ACME - average causal mediation effect), ADE (average direct effect),
+##' PM (proportion mediated) and TE (total effect). Composition of tables: estimated effect,
+##' confidence interval and mediation pValue.
+##'
+##' @details
+##'
+##' We use the mediate() function of the mediation package on the set of selected DMRs.
+##' This function makes it possible to estimate their indirect effects and to
+##' test their significance.
+##'
+##' @export
+##' @author Basile Jumentier
+##' @references
+##' @examples
+##'
 univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3) {
 
   ACME <- matrix(ncol = 4, nrow = ncol(DMR))
@@ -387,7 +617,20 @@ univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3
 
 
 
-
+##' plot_summary_DMR Summary plot for univariate_mediation_DMR function
+##'
+##' This function draw a summary plot of the mediation analysis
+##'
+##' @param res_univariate_mediation_DMR result object from res_univariate_mediation_DMR() function
+##' @param res_DMR_built result object from res_DMR_built() function
+##' @return
+##' Summary plot
+##'
+##'
+##' @export
+##' @author Basile Jumentier
+##' @examples
+##'
 plot_summary_DMR <- function(res_univariate_mediation_DMR, res_DMR_built) {
 
   tmp <- merge.data.frame(res_univariate_mediation_DMR$ACME,

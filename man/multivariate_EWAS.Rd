@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{multivariate_EWAS}
 \alias{multivariate_EWAS}
-\title{multivariate_EWAS}
+\title{multivariate_EWAS Epigenome Wide Association Study with both exposure and outcome}
 \usage{
 multivariate_EWAS(X, Y, M, K, covar = NULL)
 }
@@ -16,28 +16,42 @@ Each column corresponds to a distinct explanatory variable (Outcome).
 Explanatory variables must be encoded as numeric variables.}
 
 \item{M}{a response variable matrix with n rows and p columns.
-Each column corresponds to a distinct response variable (beta-normalized methylation profile).
-Response variables must be encoded as numeric.}
+Each column corresponds to a beta-normalized methylation profile.
+Response variables must be encoded as numeric. No NAs allowed.}
 
 \item{K}{an integer for the number of latent factors in the regression model.}
+
+\item{covar}{set of covariable, must be numeric.}
 }
 \value{
-an object of class \code{lfmm} with the following attributes:
- - U the latent variable score matrix with dimensions n x K,
- - V the latent variable axis matrix with dimensions p x K,
- - B the effect size matrix with dimensions p x d.
+an object with the following attributes:
+
+ - U the latent variable score matrix with dimensions n x K.
+
+ - B the effect size matrix for the exposure X and the outcome Y.
+
+ - score matrix for the exposure X and the outcome Y.
+
+ - pValue matrix for the exposure X and the outcome Y.
+
+ - calibrated.score2, the calibrated score matrix for the exposure X and the outcome Y.
+
+ - calibrated.pvalue, the calibrated pValue matrix for the exposure X and the outcome Y.
+
+ - GIF : Genomic Inflation Factor for exposure and outcome
 }
 \description{
-This function computes regularized least squares estimates
-for latent factor mixed models using a ridge penalty.
+This function uses lfmm (latent factor mixed models) to estimate
+the effects of exposures and outcomes on a response matrix.
 }
 \details{
 The response variable matrix Y and the explanatory variable are centered.
+Missing values must be imputed. The number of latent factors can be estimated
+by looking at the screeplot of eigenvalues of a PCA.
+Possibility of calibrating the scores and pValues by the GIF (Genomic Inflation Factor).
+See lfmm package for more information.
 }
 \examples{
-
-}
-\references{
 
 }
 \author{
