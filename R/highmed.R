@@ -343,7 +343,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
     return(cor.stouffer)
   }
 
-  if (nCores > detectCores()) {
+  if (nCores > parallel::detectCores()) {
     nCores = detectCores()
   }
   data = as.data.frame(data)
