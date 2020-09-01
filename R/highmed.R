@@ -46,9 +46,11 @@ multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
   dat <- lfmm::lfmm_ridge(Y = M, X = cbind(X, Y, covar), K = K)
   beta <- dat$B[, 1:2]
+  U <- dat$U
   dat <- lfmm::lfmm_test(Y = M, X = cbind(X, Y, covar), lfmm = dat)
 
   return(list(beta = beta,
+              U = U,
               score = dat$score[, 1:2],
               pValue = dat$pvalue[, 1:2],
               calibrated.score2 = dat$calibrated.score2[, 1:2],
