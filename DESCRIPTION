@@ -19,4 +19,5 @@ Imports:
     fdrtool,
     IRanges,
     utils,
-    parallel
+    parallel,
+    Biostrings

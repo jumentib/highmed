@@ -383,7 +383,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       b = IRanges::reduce(a, min.gapwidth = dist.cutoff)
       start = start(b)
       end = end(b)
-      region.max <- max(width(b))
+      region.max <- max(Biostrings::width(b))
       temp = sapply(1:length(b), function(i) {
         index.i = (pos >= start[i] & pos <= end[i])
         if (sum(index.i) > 1) {
