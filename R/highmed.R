@@ -44,7 +44,7 @@
 ##'
 multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
-  dat <- lfmm::lfmm_ridge(Y = M, X = cbind(X, Y, covar), K = k)
+  dat <- lfmm::lfmm_ridge(Y = M, X = cbind(X, Y, covar), K = K)
   beta <- dat$B[, 1:2]
   dat <- lfmm::lfmm_test(Y = M, X = cbind(X, Y, covar), lfmm = dat)
 
