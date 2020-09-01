@@ -214,6 +214,8 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
 ##' @author Basile Jumentier
 ##' @examples
 ##'
+##' @import ggplot2
+##'
 plot_summary_ACME <- function(ACME) {
 
   p <- ggplot(ACME, aes(est, reorder(CpG, est), color = pval <= 0.05, shape = pval <= 0.05)) +
@@ -245,6 +247,8 @@ plot_summary_ACME <- function(ACME) {
 ##' @export
 ##' @author Basile Jumentier
 ##' @examples
+##'
+##' @import ggplot2
 ##'
 plot_summary_med <- function(res_univariate_mediation) {
 
@@ -633,6 +637,7 @@ univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3
 ##' @author Basile Jumentier
 ##' @examples
 ##'
+##' @import ggplot2
 plot_summary_DMR <- function(res_univariate_mediation_DMR, res_DMR_built) {
 
   tmp <- merge.data.frame(res_univariate_mediation_DMR$ACME,
