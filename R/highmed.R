@@ -348,7 +348,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
   }
   data = as.data.frame(data)
   acf <- get.acf(data, dist.cutoff, bin.size)
-  result <- mclapply(unique(data$V1), function(chr) {
+  result <- parallel::mclapply(unique(data$V1), function(chr) {
     y = data[data$V1 == chr, ]
     y = y[order(y$V3), ]
     pos = y$V3
