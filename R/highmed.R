@@ -344,7 +344,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
   }
 
   if (nCores > parallel::detectCores()) {
-    nCores = detectCores()
+    nCores = parallel::detectCores()
   }
   data = as.data.frame(data)
   acf <- get.acf(data, dist.cutoff, bin.size)
