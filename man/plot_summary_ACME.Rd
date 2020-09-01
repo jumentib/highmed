@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{plot_summary_ACME}
 \alias{plot_summary_ACME}
-\title{plot_summary_ACME Summary plot for ACME}
+\title{Summary plot for ACME}
 \usage{
 plot_summary_ACME(ACME)
 }

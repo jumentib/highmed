@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{max2}
 \alias{max2}
-\title{max2 Compute the squared maximum of two series of pValues}
+\title{Compute the squared maximum of two series of pValues}
 \usage{
 max2(pval1, pval2, diagnostic.plot = F, ...)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{plot_summary_med}
 \alias{plot_summary_med}
-\title{plot_summary_med Summary plot for univariate_mediation function}
+\title{Summary plot for univariate_mediation function}
 \usage{
 plot_summary_med(res_univariate_mediation)
 }

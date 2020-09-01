@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{multivariate_EWAS}
 \alias{multivariate_EWAS}
-\title{multivariate_EWAS Epigenome Wide Association Study with both exposure and outcome}
+\title{Epigenome Wide Association Study with both exposure and outcome}
 \usage{
 multivariate_EWAS(X, Y, M, K, covar = NULL)
 }

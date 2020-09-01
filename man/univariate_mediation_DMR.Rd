@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{univariate_mediation_DMR}
 \alias{univariate_mediation_DMR}
-\title{univariate_mediation_DMR Run mediation analysis on DMR}
+\title{Run mediation analysis on DMR}
 \usage{
 univariate_mediation_DMR(X, Y, DMR, covar = NULL, U = NULL, sims = 3)
 }

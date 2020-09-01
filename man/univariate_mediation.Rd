@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{univariate_mediation}
 \alias{univariate_mediation}
-\title{univariate_mediation Run mediation analysis for a set of markers}
+\title{Run mediation analysis for a set of markers}
 \usage{
 univariate_mediation(qval, X, Y, M, covar = NULL, U = NULL,
   FDR = 0.1, sims = 3, ...)

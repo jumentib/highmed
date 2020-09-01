@@ -1,4 +1,4 @@
-##' multivariate_EWAS Epigenome Wide Association Study with both exposure and outcome
+##' Epigenome Wide Association Study with both exposure and outcome
 ##'
 ##' This function uses lfmm (latent factor mixed models) to estimate
 ##' the effects of exposures and outcomes on a response matrix.
@@ -58,7 +58,7 @@ multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
 
 
-##' max2 Compute the squared maximum of two series of pValues
+##' Compute the squared maximum of two series of pValues
 ##'
 ##' This function compute the squared maximum of two series of pValues from the multivariate_EWAS() function.
 ##' The objective of this function is to test all the markers and to determine which could be
@@ -106,7 +106,7 @@ max2 <- function(pval1, pval2, diagnostic.plot = F, ...) {
               qval = qval))
 }
 
-##' univariate_mediation Run mediation analysis for a set of markers
+##' Run mediation analysis for a set of markers
 ##'
 ##' Estimate various quantities for causal mediation analysis for each
 ##' significant markers, including average causal mediation effects
@@ -199,7 +199,7 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
 
 }
 
-##' plot_summary_ACME Summary plot for ACME
+##' Summary plot for ACME
 ##'
 ##' This function draw a summary plot of ACME (average causal mediation effect)
 ##'
@@ -231,7 +231,7 @@ plot_summary_ACME <- function(ACME) {
 
 
 
-##' plot_summary_med Summary plot for univariate_mediation function
+##' Summary plot for univariate_mediation function
 ##'
 ##' This function draw a summary plot of the mediation analysis
 ##'
@@ -274,7 +274,7 @@ plot_summary_med <- function(res_univariate_mediation) {
   print(p)
 }
 
-##' combp2 Run mediation analysis for a set of markers
+##' Run mediation analysis for a set of markers
 ##'
 ##' Function adapt from the combp function() of the ENmix package
 ##'
@@ -403,7 +403,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
 }
 
 
-##' DMR_search Find DMR
+##' Find DMR
 ##'
 ##' To identify differentially methylated regions using a modified comb-p method.
 ##'
@@ -439,7 +439,7 @@ DMR_search <- function(chr, start, end, pval, cpg, ...) {
 }
 
 
-##' DMR_built Build DMR vector
+##' Build DMR vector
 ##'
 ##' To build a vector for each DMR find with DMR_search
 ##'
@@ -532,7 +532,7 @@ DMR_built <- function(res, methylation, nb_cpg = 2) {
               CpG_for_each_DMR = DMR.select))
 }
 
-##' univariate_mediation_DMR Run mediation analysis on DMR
+##' Run mediation analysis on DMR
 ##'
 ##' Estimate various quantities for causal mediation analysis for each
 ##' DMRs, including average causal mediation effects
@@ -617,7 +617,7 @@ univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3
 
 
 
-##' plot_summary_DMR Summary plot for univariate_mediation_DMR function
+##' Summary plot for univariate_mediation_DMR function
 ##'
 ##' This function draw a summary plot of the mediation analysis
 ##'
@@ -655,15 +655,3 @@ plot_summary_DMR <- function(res_univariate_mediation_DMR, res_DMR_built) {
 
   print(p)
 }
-
-
-
-
-
-
-
-
-
-
-
-

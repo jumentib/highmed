@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{DMR_search}
 \alias{DMR_search}
-\title{DMR_search Find DMR}
+\title{Find DMR}
 \usage{
 DMR_search(chr, start, end, pval, cpg, ...)
 }

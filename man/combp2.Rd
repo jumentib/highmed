@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{combp2}
 \alias{combp2}
-\title{combp2 Run mediation analysis for a set of markers}
+\title{Run mediation analysis for a set of markers}
 \usage{
 combp2(data, dist.cutoff = 1000, bin.size = 310, seed = 0.01,
   nCores = 10)

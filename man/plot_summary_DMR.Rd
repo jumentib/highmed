@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{plot_summary_DMR}
 \alias{plot_summary_DMR}
-\title{plot_summary_DMR Summary plot for univariate_mediation_DMR function}
+\title{Summary plot for univariate_mediation_DMR function}
 \usage{
 plot_summary_DMR(res_univariate_mediation_DMR, res_DMR_built)
 }

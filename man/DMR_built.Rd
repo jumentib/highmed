@@ -2,7 +2,7 @@
 % Please edit documentation in R/highmed.R
 \name{DMR_built}
 \alias{DMR_built}
-\title{DMR_built Build DMR vector}
+\title{Build DMR vector}
 \usage{
 DMR_built(res, methylation, nb_cpg = 2)
 }
