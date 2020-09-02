@@ -5,8 +5,8 @@ Version: 1.0
 Date: 2020-08-27
 Author: Basile Jumentier <basile.jumentier@gmail.com>
 Maintainer: Basile Jumentier <basile.jumentier@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: The package contains a set of functions allowing to perform mediation analyzes in very high dimension. It was developed for DNA methylation data.
+
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
