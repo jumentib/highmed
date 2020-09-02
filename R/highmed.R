@@ -386,6 +386,9 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       region.max <- max(Biostrings::width(b))
       temp = sapply(1:length(b), function(i) {
         index.i = (pos >= start[i] & pos <= end[i])
+
+        print(sum(index.i))
+
         if (sum(index.i) > 1) {
           int <- findInterval(c(dist(pos[index.i])),
                               seq(bin.size, region.max + bin.size, bin.size))
