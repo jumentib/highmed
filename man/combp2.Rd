@@ -4,8 +4,7 @@
 \alias{combp2}
 \title{Run mediation analysis for a set of markers}
 \usage{
-combp2(data, dist.cutoff = 1000, bin.size = 310, seed = 0.01,
-  nCores = 10)
+combp2(data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCores = 10)
 }
 \arguments{
 \item{data}{A data frame from bed format file with colname name
@@ -31,7 +30,7 @@ The input should be a data frame with column name V1-V5, indicating chromosome, 
 pValues and probe names. The function will use a modified comb-p method to identify
 differentially methylated regions.
 }
-\examples{
+\references{
 
 }
 \author{

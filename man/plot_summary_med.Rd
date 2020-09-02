@@ -17,6 +17,8 @@ This function draw a summary plot of the mediation analysis
 }
 \examples{
 
+# see univariate_mediation example
+
 }
 \author{
 Basile Jumentier

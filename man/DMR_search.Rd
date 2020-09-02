@@ -31,6 +31,31 @@ differentially methylated regions (DMRs).
 }
 \examples{
 
+library(highmed)
+
+# Run multivariate EWAS
+
+res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+
+# Keep latent factors for univariate mediation
+
+U <- res$U
+
+# Run max2
+
+res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+
+# lauch DMR_search
+
+res <- DMR_search(chr = example$annotation$chr,
+                  start = example$annotation$start,
+                  end = example$annotation$end,
+                  pval = res$pval,
+                  cpg = example$annotation$cpg, nCores = 1)
+
+}
+\references{
+
 }
 \author{
 Basile Jumentier

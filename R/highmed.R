@@ -42,6 +42,13 @@
 ##' @references
 ##' @examples
 ##'
+##' library(highmed)
+##'
+##' # Run multivariate_EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##'
 multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 
   dat <- lfmm::lfmm_ridge(Y = M, X = cbind(X, Y, covar), K = K)
@@ -97,6 +104,21 @@ multivariate_EWAS <- function(X, Y, M, K, covar = NULL) {
 ##' @references
 ##' @examples
 ##'
+##' library(highmed)
+##'
+##' # Run multivariate_EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##' # Run max2
+##'
+##' res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+##'
+##' # Manhattan plot
+##'
+##' plot(-log10(res$pval), main = paste0("Eta0 = ", round(res$eta0, 3)))
+##' abline(h = -log10(0.05 / ncol(example$M)))
+##'
 max2 <- function(pval1, pval2, diagnostic.plot = F, ...) {
 
   pval <- apply(cbind(pval1, pval2), 1, max)^2
@@ -149,6 +171,36 @@ max2 <- function(pval1, pval2, diagnostic.plot = F, ...) {
 ##' @references
 ##' @examples
 ##'
+##' library(highmed)
+##'
+##' data(example)
+##'
+##' # Run multivariate EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##' # Keep latent factors for univariate mediation
+##'
+##' U <- res$U
+##'
+##' # Run max2
+##'
+##' res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+##'
+##' # Run Univariate mediation (only 3 simulations for estimate and test indirect effect)
+##'
+##' res <- univariate_mediation(qval = res$qval,
+##'                             X = example$X,
+##'                             Y = example$Y,
+##'                             M = example$M,
+##'                             U = U, sims = 3)
+##'
+##' # Plot summary
+##'
+##' plot_summary_ACME(res$ACME)
+##'
+##' plot_summary_med(res)
+##'
 univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.1, sims = 3, ...) {
 
   if (is.null(colnames(M))) {
@@ -168,8 +220,8 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
     dat.x <- data.frame(X = X, Mi = M[, i], covar = cbind(covar, U))
     dat.y <- data.frame(X = X, Mi = M[, i], covar = cbind(covar, U), Y = Y)
 
-    mod1 <- lm(Mi ~ X + ., data = dat.x)
-    mod2 <- lm(Y ~ X + Mi + ., data = dat.y)
+    mod1 <- stats::lm(Mi ~ X + ., data = dat.x)
+    mod2 <- stats::lm(Y ~ X + Mi + ., data = dat.y)
 
     med <- mediation::mediate(mod1, mod2, sims = sims, treat = "X", mediator = "Mi", ...)
 
@@ -214,11 +266,15 @@ univariate_mediation <- function(qval, X, Y, M, covar = NULL, U = NULL, FDR = 0.
 ##' @author Basile Jumentier
 ##' @examples
 ##'
+##' # see univariate_mediation example
+##'
 ##' @import ggplot2
 ##'
 plot_summary_ACME <- function(ACME) {
 
-  p <- ggplot(ACME, aes(est, reorder(CpG, est), color = pval <= 0.05, shape = pval <= 0.05)) +
+  # for check problem
+
+  p <- ggplot(ACME, aes(est, stats::reorder(CpG, est), color = pval <= 0.05, shape = pval <= 0.05)) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     geom_errorbarh(aes(xmin = CI_2.5, xmax = CI_97.5)) +
     geom_point(size = 0.8) +
@@ -248,9 +304,14 @@ plot_summary_ACME <- function(ACME) {
 ##' @author Basile Jumentier
 ##' @examples
 ##'
+##' # see univariate_mediation example
+##'
 ##' @import ggplot2
 ##'
 plot_summary_med <- function(res_univariate_mediation) {
+
+  # for check problem
+
 
   tmp <- rbind(cbind(res$ACME, stat = "ACME"),
                cbind(res$ADE, stat = "ADE"),
@@ -303,7 +364,6 @@ plot_summary_med <- function(res_univariate_mediation) {
 ##'
 ##' @author Basile Jumentier
 ##' @references
-##' @examples
 ##'
 combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCores = 10) {
 
@@ -330,8 +390,8 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       temp<-rbind(temp,acf.table(y$V4,y$V3,dist.cutoff))
     }
     bin.label<-findInterval(temp$dist,seq(bin.size,dist.cutoff,bin.size))
-    temp.stouffer<-by(temp,bin.label,FUN=function(x){cor.test(qnorm(x$x1),
-                                                              qnorm(x$x2),alternative="greater")},simplify=FALSE)
+    temp.stouffer<-by(temp,bin.label,FUN=function(x){stats::cor.test(stats::qnorm(x$x1),
+                                                                     stats::qnorm(x$x2),alternative="greater")},simplify=FALSE)
 
     cor.stouffer<-sapply(temp.stouffer,function(x){x$estimate})
     p.stouffer<-sapply(temp.stouffer,function(x){x$p.value})
@@ -352,14 +412,14 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
     y = data[data$V1 == chr, ]
     y = y[order(y$V3), ]
     pos = y$V3
-    p = qnorm(y$V4)
+    p = stats::qnorm(y$V4)
     temp = sapply(pos, function(i) {
       index.i = (abs(pos - i) < bin.size)
       if (sum(index.i) > 1) {
-        int <- findInterval(c(dist(pos[index.i])), c(bin.size,
+        int <- findInterval(c(stats::dist(pos[index.i])), c(bin.size,
                                                      2 * bin.size))
         sd <- sqrt(sum(acf[int + 1]) * 2 + sum(index.i))
-        return(pnorm(sum(p[index.i]), mean = 0, sd = sd))
+        return(stats::pnorm(sum(p[index.i]), mean = 0, sd = sd))
       }
       else {
         return(y$V4[index.i])
@@ -369,15 +429,15 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
   }, mc.cores = nCores)
   result <- do.call("rbind", result)
   names(result) = c("chr", "start", "end", "s.p")
-  result = result[p.adjust(result$s.p, method = "fdr") < seed,
-                  ]
+  result = result[stats::p.adjust(result$s.p, method = "fdr") < seed,]
+
   result.fdr = NULL
   if (nrow(result) > 0) {
     for (chr in unique(result$chr)) {
       y = data[data$V1 == chr, ]
       y = y[order(y$V3), ]
       pos = y$V3
-      p = qnorm(y$V4)
+      p = stats::qnorm(y$V4)
       result.chr = result[result$chr == chr, ]
       a = IRanges::IRanges(start = result.chr$start, end = result.chr$end)
       b = IRanges::reduce(a, min.gapwidth = dist.cutoff)
@@ -390,11 +450,11 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
         # print(sum(index.i))
 
         if (sum(index.i) > 1) {
-          int <- findInterval(c(dist(pos[index.i])),
+          int <- findInterval(c(stats::dist(pos[index.i])),
                               seq(bin.size, region.max + bin.size, bin.size))
           sd <- sqrt(sum(ifelse(int < length(acf), acf[int +
                                                          1], 0)) * 2 + sum(index.i))
-          return(pnorm(sum(p[index.i]), mean = 0, sd = sd))
+          return(stats::pnorm(sum(p[index.i]), mean = 0, sd = sd))
         }
         else {
           return(y$V4[index.i])
@@ -403,7 +463,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       result.fdr = rbind(result.fdr, data.frame(chr, start,
                                                 end, p = temp))
     }
-    result.fdr$fdr = p.adjust(result.fdr$p, method = "fdr")
+    result.fdr$fdr = stats::p.adjust(result.fdr$p, method = "fdr")
     result.fdr <- result.fdr[order(result.fdr$p), ]
     result.fdr$start = (result.fdr$start - 1)
   }
@@ -435,6 +495,28 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
 ##' @author Basile Jumentier
 ##' @references
 ##' @examples
+##'
+##' library(highmed)
+##'
+##' # Run multivariate EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##' # Keep latent factors for univariate mediation
+##'
+##' U <- res$U
+##'
+##' # Run max2
+##'
+##' res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+##'
+##' # lauch DMR_search
+##'
+##' res <- DMR_search(chr = example$annotation$chr,
+##'                   start = example$annotation$start,
+##'                   end = example$annotation$end,
+##'                   pval = res$pval,
+##'                   cpg = example$annotation$cpg, nCores = 1)
 ##'
 DMR_search <- function(chr, start, end, pval, cpg, ...) {
 
@@ -479,7 +561,37 @@ DMR_search <- function(chr, start, end, pval, cpg, ...) {
 ##' @references
 ##' @examples
 ##'
+##' library(highmed)
+##'
+##' # Run multivariate EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##' # Keep latent factors for univariate mediation
+##'
+##' U <- res$U
+##'
+##' # Run max2
+##'
+##' res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+##'
+##' # lauch DMR_search
+##'
+##' res <- DMR_search(chr = example$annotation$chr,
+##'                   start = example$annotation$start,
+##'                   end = example$annotation$end,
+##'                   pval = res$pval,
+##'                   cpg = example$annotation$cpg, nCores = 1)
+##'
+##' # lauch DMR_built
+##'
+##' res <- DMR_built(res, methylation = example$M, nb_cpg = 2)
+##'
 DMR_built <- function(res, methylation, nb_cpg = 2) {
+
+  # for check problem
+
+  chr <- NULL
 
   data <- res$data
   res <- res$res
@@ -528,7 +640,7 @@ DMR_built <- function(res, methylation, nb_cpg = 2) {
   colnames(DMR.acp) <- paste0("DMR", 1:length(DMR.meth))
 
   for (i in 1:length(DMR.meth)) {
-    DMR.acp[, i] <- prcomp(DMR.meth[[i]])$x[, 1]
+    DMR.acp[, i] <- stats::prcomp(DMR.meth[[i]])$x[, 1]
   }
 
   # data
@@ -578,6 +690,40 @@ DMR_built <- function(res, methylation, nb_cpg = 2) {
 ##' @references
 ##' @examples
 ##'
+##' library(highmed)
+##'
+##' # Run multivariate EWAS
+##'
+##' res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+##'
+##' # Keep latent factors for univariate mediation
+##'
+##' U <- res$U
+##'
+##' # Run max2
+##'
+##' res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+##'
+##' # lauch DMR_search
+##'
+##' res <- DMR_search(chr = example$annotation$chr,
+##'                   start = example$annotation$start,
+##'                   end = example$annotation$end,
+##'                   pval = res$pval,
+##'                   cpg = example$annotation$cpg, nCores = 1)
+##'
+##' # lauch DMR_built
+##'
+##' tmp <- DMR_built(res, methylation = example$M, nb_cpg = 2)
+##'
+##' # Univariate mediation for each DMR
+##'
+##' res <- univariate_mediation_DMR(X = example$X, Y = example$Y, DMR = tmp$DMR_acp, U = U, sims = 3)
+##'
+##' # Summary plot
+##'
+##' plot_summary_DMR(res, tmp)
+##'
 univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3) {
 
   ACME <- matrix(ncol = 4, nrow = ncol(DMR))
@@ -590,8 +736,8 @@ univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3
     dat.x <- data.frame(X = X, Mi = DMR[, i], covar = cbind(covar, U))
     dat.y <- data.frame(X = X, Mi = DMR[, i], covar = cbind(covar, U), Y = Y)
 
-    mod1 <- lm(Mi ~ X + ., data = dat.x)
-    mod2 <- lm(Y ~ X + Mi + ., data = dat.y)
+    mod1 <- stats::lm(Mi ~ X + ., data = dat.x)
+    mod2 <- stats::lm(Y ~ X + Mi + ., data = dat.y)
 
     med <- mediation::mediate(mod1, mod2, sims = sims, treat = "X", mediator = "Mi")
 
@@ -640,15 +786,18 @@ univariate_mediation_DMR <- function(X, Y, DMR, covar = NULL, U = NULL, sims = 3
 ##' @author Basile Jumentier
 ##' @examples
 ##'
+##' # see univariate_mediation_DMR example
+##'
 ##' @import ggplot2
 plot_summary_DMR <- function(res_univariate_mediation_DMR, res_DMR_built) {
+
 
   tmp <- merge.data.frame(res_univariate_mediation_DMR$ACME,
                           res_DMR_built$res, by.x = 5, by.y = 1)
 
   tmp$dmr <- paste0(tmp$chr, ":", tmp$start, "-", tmp$end)
 
-  p <- ggplot(tmp, aes(est, reorder(dmr, pval), color = nb, shape = pval <= 0.05)) +
+  p <- ggplot(tmp, aes(est, stats::reorder(dmr, pval), color = nb, shape = pval <= 0.05)) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     geom_point() +
     geom_errorbarh(aes(xmin = CI_2.5, xmax = CI_97.5)) +

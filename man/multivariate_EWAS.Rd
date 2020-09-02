@@ -53,6 +53,16 @@ See lfmm package for more information.
 }
 \examples{
 
+library(highmed)
+
+# Run multivariate_EWAS
+
+res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+
+
+}
+\references{
+
 }
 \author{
 Basile Jumentier

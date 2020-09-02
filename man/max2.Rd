@@ -45,6 +45,24 @@ which allows us to control the FDR.
 }
 \examples{
 
+library(highmed)
+
+# Run multivariate_EWAS
+
+res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+
+# Run max2
+
+res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+
+# Manhattan plot
+
+plot(-log10(res$pval), main = paste0("Eta0 = ", round(res$eta0, 3)))
+abline(h = -log10(0.05 / ncol(example$M)))
+
+}
+\references{
+
 }
 \author{
 Basile Jumentier

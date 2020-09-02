@@ -17,6 +17,8 @@ This function draw a summary plot of ACME (average causal mediation effect)
 }
 \examples{
 
+# see univariate_mediation example
+
 }
 \author{
 Basile Jumentier

@@ -45,6 +45,43 @@ test their significance.
 }
 \examples{
 
+library(highmed)
+
+# Run multivariate EWAS
+
+res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+
+# Keep latent factors for univariate mediation
+
+U <- res$U
+
+# Run max2
+
+res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+
+# lauch DMR_search
+
+res <- DMR_search(chr = example$annotation$chr,
+                  start = example$annotation$start,
+                  end = example$annotation$end,
+                  pval = res$pval,
+                  cpg = example$annotation$cpg, nCores = 1)
+
+# lauch DMR_built
+
+tmp <- DMR_built(res, methylation = example$M, nb_cpg = 2)
+
+# Univariate mediation for each DMR
+
+res <- univariate_mediation_DMR(X = example$X, Y = example$Y, DMR = tmp$DMR_acp, U = U, sims = 3)
+
+# Summary plot
+
+plot_summary_DMR(res, tmp)
+
+}
+\references{
+
 }
 \author{
 Basile Jumentier

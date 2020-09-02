@@ -4,8 +4,17 @@
 \alias{univariate_mediation}
 \title{Run mediation analysis for a set of markers}
 \usage{
-univariate_mediation(qval, X, Y, M, covar = NULL, U = NULL,
-  FDR = 0.1, sims = 3, ...)
+univariate_mediation(
+  qval,
+  X,
+  Y,
+  M,
+  covar = NULL,
+  U = NULL,
+  FDR = 0.1,
+  sims = 3,
+  ...
+)
 }
 \arguments{
 \item{qval}{set of qValues from max2() function}
@@ -51,6 +60,39 @@ than the FDR threshold. This function makes it possible to estimate their indire
 test their significance.
 }
 \examples{
+
+library(highmed)
+
+data(example)
+
+# Run multivariate EWAS
+
+res <- multivariate_EWAS(X = example$X, Y = example$Y, M = example$M, K = 5)
+
+# Keep latent factors for univariate mediation
+
+U <- res$U
+
+# Run max2
+
+res <- max2(pval1 = res$pValue[, 1], pval2 = res$pValue[, 2])
+
+# Run Univariate mediation (only 3 simulations for estimate and test indirect effect)
+
+res <- univariate_mediation(qval = res$qval,
+                            X = example$X,
+                            Y = example$Y,
+                            M = example$M,
+                            U = U, sims = 3)
+
+# Plot summary
+
+plot_summary_ACME(res$ACME)
+
+plot_summary_med(res)
+
+}
+\references{
 
 }
 \author{

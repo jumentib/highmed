@@ -19,6 +19,8 @@ This function draw a summary plot of the mediation analysis
 }
 \examples{
 
+# see univariate_mediation_DMR example
+
 }
 \author{
 Basile Jumentier
