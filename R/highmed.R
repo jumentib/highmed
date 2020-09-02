@@ -381,8 +381,8 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       result.chr = result[result$chr == chr, ]
       a = IRanges::IRanges(start = result.chr$start, end = result.chr$end)
       b = IRanges::reduce(a, min.gapwidth = dist.cutoff)
-      start = start(b)
-      end = end(b)
+      start = IRanges::start(b)
+      end = IRanges::end(b)
       region.max <- max(Biostrings::width(b))
       temp = sapply(1:length(b), function(i) {
         index.i = (pos >= start[i] & pos <= end[i])
