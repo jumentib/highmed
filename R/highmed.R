@@ -387,7 +387,7 @@ combp2 <- function (data, dist.cutoff = 1000, bin.size = 310, seed = 0.01, nCore
       temp = sapply(1:length(b), function(i) {
         index.i = (pos >= start[i] & pos <= end[i])
 
-        print(sum(index.i))
+        # print(sum(index.i))
 
         if (sum(index.i) > 1) {
           int <- findInterval(c(dist(pos[index.i])),
